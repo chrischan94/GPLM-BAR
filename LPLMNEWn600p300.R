@@ -2,10 +2,10 @@
 #Compute Median Mean Squared Error (MMSE) of the non-zero betas
 #WITH INTERCEPT
 #p=300,n=600
+#Our model doesn't have an intercept
 
 rm(list=ls())
 
-cat("The program starts at", date(), "\n")
 #Load necessary libraries
 library(BrokenAdaptiveRidge)
 library(mvtnorm)
@@ -22,13 +22,13 @@ pz = 5 # number of non-zero high-dimensional parameters
 pnonz = p - pz 
 qW = 5 # number of categorical variables
 qZ = 4 # number of non-linear variables
-B = 10 #number of replications
+B = 200 #number of replications
 prob = 0.5 
-beta <- c(2,-2,rep(0, pnonz),-2,1.5,1.5)/2 #vector of high-dimensional "genetic" covariates
+beta <- c(1,-1,rep(0, pnonz),-1,0.75,0.75) #vector of high-dimensional "genetic" covariates
 alpha <- c(1,-0.5,-0.5,0.75,-1) #alphas are not zero
 nzpos <- c(1,2,(p-2):p) #index position of non-zero regression parameters, ONLY for high dimensional covariates
 zpos <- (1:p)[-nzpos] #index position of zero regression parameters, ONLY for high dimensional covariates
-b = 3 #number of basis functions, 3 basis functions is fine
+b = 3 #number of basis functions
 l1 = 0.85 #left
 r1 = 5.15 #right
 l2 = -0.05
@@ -37,8 +37,8 @@ l3 = -3.15
 r3 = 1.15
 adj1 = 0.2
 adj2 = 0.05
-int = TRUE #Whether to return Bernstein Poly with intercept
-reg.estBARAIC <- matrix(0,B,p+qW) #stores the regression estimates of PLLRM-BAR
+int = TRUE #Bernstein Polynomials with intercept (TRUE) or no intercept (FALSE)
+reg.estBARAIC <- matrix(0,B,p+qW) #stores the regression estimates of BAR
 reg.estLasso <- matrix(0,B,p+qW) #stores the regression estimates of Lasso penalty
 reg.estALasso <- matrix(0,B,p+qW) #stores the regression estimates of Alasso penalty
 reg.estBARBIC <- matrix(0,B,p+qW) #stores the regression estimates of SCAD
@@ -176,8 +176,8 @@ TP1 <- numeric(B) #True positives: the number of non-zero regression parameters 
 TN1 <- numeric(B) #True negatives: the number of zero regression parameters estimated as zero
 FP1 <- numeric(B) #False positives: the number of zero regression parameters estimated as non-zero
 TM1 <- numeric(B)
-TP2 <- numeric(B) #True positives: the number of non-zero regression parameters estimated as non-zero
-TN2 <- numeric(B) #True negatives: the number of zero regression parameters estimated as zero
+TP2 <- numeric(B) 
+TN2 <- numeric(B) 
 FP2 <- numeric(B) #False positives: the number of zero regression parameters estimated as non-zero
 TM2 <- numeric(B)
 TP3 <- numeric(B) #True positives: the number of non-zero regression parameters estimated as non-zero
