@@ -22,7 +22,7 @@ pz = 5 # number of non-zero high-dimensional parameters
 pnonz = p - pz 
 qW = 5 # number of categorical variables
 qZ = 4 # number of non-linear variables
-B = 200 #number of replications
+B = 20 #number of replications
 prob = 0.5 
 beta <- c(1,-1,rep(0, pnonz),-1,0.75,0.75) #vector of high-dimensional "genetic" covariates
 alpha <- c(1,-0.5,-0.5,0.75,-1) #alphas are not zero
@@ -42,22 +42,19 @@ reg.estBARAIC <- matrix(0,B,p+qW) #stores the regression estimates of BAR
 reg.estLasso <- matrix(0,B,p+qW) #stores the regression estimates of Lasso penalty
 reg.estALasso <- matrix(0,B,p+qW) #stores the regression estimates of Alasso penalty
 reg.estBARBIC <- matrix(0,B,p+qW) #stores the regression estimates of SCAD
-reg.estMLE <- matrix(0,B,pz+qW) #stores regression estimates of MLE
-gammaAIC1.Z <- matrix(0,B,b+as.integer(int)) #stores the est gamma values of psi(Z1)
-gammaAIC2.Z <- matrix(0,B,b+as.integer(int)) #stores the est gamma values of psi(Z2)
-gammaAIC3.Z <- matrix(0,B,b+as.integer(int)) #stores the est gamma values of psi(Z3)
-gammaAIC4.Z <- matrix(0,B,b+as.integer(int)) #stores the est gamma values of psi(Z4)
+reg.estMLE <- matrix(0,B,pz+qW) #stores regression estimates of MLE(Oracle)
 
-Z1.c <- seq(l1+adj1,r1-adj1,by=0.001) #control sequence of Z1
-Z2.c <- seq(l2+adj2,r2-adj2,by=0.001) #control sequence of Z2
+#control sequences of Z1-Z4
+Z1.c <- seq(l1+adj1,r1-adj1,by=0.001) 
+Z2.c <- seq(l2+adj2,r2-adj2,by=0.001) 
 Z3.c <- seq(l2+adj2,r2-adj2,by=0.001)
 Z4.c <- seq(l3+adj1,r3-adj1,by=0.001)
 
-nonlin.estBARAIC1 <- matrix(0,B,length(Z1.c)) #stores the estimated alphas of PLLRM-BAR of \psi(Z1)
+nonlin.estBARAIC1 <- matrix(0,B,length(Z1.c)) #stores the estimated alphas of PLLRM-BAR of $\psi_1(Z_1)$
 nonlin.estBARAIC2 <- matrix(0,B,length(Z2.c)) 
 nonlin.estBARAIC3 <- matrix(0,B,length(Z3.c)) 
 nonlin.estBARAIC4 <- matrix(0,B,length(Z4.c)) 
-nonlin.estBARBIC1 <- matrix(0,B,length(Z1.c)) #stores the estimated alphas of PLLRM-BAR of \psi(Z1)
+nonlin.estBARBIC1 <- matrix(0,B,length(Z1.c)) #stores the estimated alphas of PLLRM-BAR of $\psi_1(Z_1)$
 nonlin.estBARBIC2 <- matrix(0,B,length(Z2.c)) 
 nonlin.estBARBIC3 <- matrix(0,B,length(Z3.c)) 
 nonlin.estBARBIC4 <- matrix(0,B,length(Z4.c)) 
@@ -137,7 +134,8 @@ while(a <= B){
   p2 <- predict(object=Z2_b,newx=Z2.c)-matrix(rep(predict(Z2_b,newx=0.5), length(Z2.c)), nrow=length(Z2.c), byrow=TRUE)
   p3 <- predict(object=Z3_b,newx=Z3.c)-matrix(rep(predict(Z3_b,newx=0.5), length(Z3.c)), nrow=length(Z3.c), byrow=TRUE)
   p4 <- predict(object=Z4_b,newx=Z4.c)-matrix(rep(predict(Z4_b,newx=-1),length(Z4.c)), nrow=length(Z4.c), byrow=TRUE)
-  
+
+  #Manually change the chunk of code below if you want to have a different number of non-linear functions.               
   gammaAIC1_hat <- coef(FitBARAIC)[(p+qW+2):(p+qW+b+as.integer(int)+1)]
   gammaAIC2_hat <- coef(FitBARAIC)[(p+qW+b+as.integer(int)+2):(p+qW+2*b+2*as.integer(int)+1)]
   gammaAIC3_hat <- coef(FitBARAIC)[(p+qW+2*b+2*as.integer(int)+2):(p+qW+3*b+3*as.integer(int)+1)]
@@ -146,7 +144,7 @@ while(a <= B){
   gammaBIC2_hat <- coef(FitBARBIC)[(p+qW+b+as.integer(int)+2):(p+qW+2*b+2*as.integer(int)+1)]
   gammaBIC3_hat <- coef(FitBARBIC)[(p+qW+2*b+2*as.integer(int)+2):(p+qW+3*b+3*as.integer(int)+1)]
   gammaBIC4_hat <- coef(FitBARBIC)[(p+qW+3*b+3*as.integer(int)+2):(p+qW+qZ*b+qZ*as.integer(int)+1)]
-  
+                 
   nonlin.estBARAIC1[a,] <- p1%*%gammaAIC1_hat
   nonlin.estBARAIC2[a,] <- p2%*%gammaAIC2_hat
   nonlin.estBARAIC3[a,] <- p3%*%gammaAIC3_hat
@@ -155,10 +153,6 @@ while(a <= B){
   nonlin.estBARBIC2[a,] <- p2%*%gammaBIC2_hat
   nonlin.estBARBIC3[a,] <- p3%*%gammaBIC3_hat
   nonlin.estBARBIC4[a,] <- p4%*%gammaBIC4_hat
-  gammaAIC1.Z[a,] <- gammaAIC1_hat
-  gammaAIC2.Z[a,] <- gammaAIC2_hat
-  gammaAIC3.Z[a,] <- gammaAIC3_hat
-  gammaAIC4.Z[a,] <- gammaAIC4_hat
   
   MSE.BARAIC[a] <- t(reg.estBARAIC[a,1:p]-beta)%*%Sigma_X%*%(reg.estBARAIC[a,1:p]-beta)
   MSE.Lasso[a] <- t(reg.estLasso[a,1:p]-beta)%*%Sigma_X%*%(reg.estLasso[a,1:p]-beta)
@@ -208,33 +202,14 @@ for(i in 1:B){
   TM4[i] <- ifelse(TP4[i] + TN4[i] == p, 1, 0)
 }
 
-m_TP1 <- mean(TP1)
-m_TN1 <- mean(TN1)
-m_FP1 <- mean(FP1)
-m_TM1 <- mean(TM1)
-m_TP2 <- mean(TP2)
-m_TN2 <- mean(TN2)
-m_FP2 <- mean(FP2)
-m_TM2 <- mean(TM2)
-m_TP3 <- mean(TP3)
-m_TN3 <- mean(TN3)
-m_FP3 <- mean(FP3)
-m_TM3 <- mean(TM3)
-m_TP4 <- mean(TP4)
-m_TN4 <- mean(TN4)
-m_FP4 <- mean(FP4)
-m_TM4 <- mean(TM4)
+m_TP1 <- mean(TP1); m_TN1 <- mean(TN1); m_FP1 <- mean(FP1); m_TM1 <- mean(TM1)
+m_TP2 <- mean(TP2); m_TN2 <- mean(TN2); m_FP2 <- mean(FP2); m_TM2 <- mean(TM2)
+m_TP3 <- mean(TP3); m_TN3 <- mean(TN3); m_FP3 <- mean(FP3); m_TM3 <- mean(TM3)
+m_TP4 <- mean(TP4); m_TN4 <- mean(TN4); m_FP4 <- mean(FP4); m_TM4 <- mean(TM4)
 
-MMSE.BARAIC <- median(MSE.BARAIC)
-MMSE.Lasso <- median(MSE.Lasso)
-MMSE.ALasso <- median(MSE.ALasso)
-MMSE.BARBIC <- median(MSE.BARBIC)
+MMSE.BARAIC <- median(MSE.BARAIC); MMSE.Lasso <- median(MSE.Lasso); MMSE.ALasso <- median(MSE.ALasso); MMSE.BARBIC <- median(MSE.BARBIC)
 MMSE.GLMMLE <- median(MSE.GLMMLE)
-SD.BARAIC <- sd(MSE.BARAIC)
-SD.Lasso <- sd(MSE.Lasso)
-SD.ALasso <- sd(MSE.ALasso)
-SD.BARBIC <- sd(MSE.BARBIC)
-SD.GLMMLE <- sd(MSE.GLMMLE)
+SD.BARAIC <- sd(MSE.BARAIC); SD.Lasso <- sd(MSE.Lasso); SD.ALasso <- sd(MSE.ALasso); SD.BARBIC <- sd(MSE.BARBIC); SD.GLMMLE <- sd(MSE.GLMMLE)
 
 #Estimate
 estBARAIC <- apply(reg.estBARAIC[,nzpos],2,mean) 
@@ -336,66 +311,24 @@ m.predZ2BIC <- apply(nonlin.estBARBIC2,2,mean)
 m.predZ3BIC <- apply(nonlin.estBARBIC3,2,mean)
 m.predZ4BIC <- apply(nonlin.estBARBIC4,2,mean) 
 
-se.predZ1AIC <- apply(nonlin.estBARAIC1,2,function(x) sd(x)/sqrt(B))
-se.predZ2AIC <- apply(nonlin.estBARAIC2,2,function(x) sd(x)/sqrt(B))
-se.predZ3AIC <- apply(nonlin.estBARAIC3,2,function(x) sd(x)/sqrt(B))
-se.predZ4AIC <- apply(nonlin.estBARAIC4,2,function(x) sd(x)/sqrt(B))
-se.predZ1BIC <- apply(nonlin.estBARBIC1,2,function(x) sd(x)/sqrt(B))
-se.predZ2BIC <- apply(nonlin.estBARBIC2,2,function(x) sd(x)/sqrt(B))
-se.predZ3BIC <- apply(nonlin.estBARBIC3,2,function(x) sd(x)/sqrt(B))
-se.predZ4BIC <- apply(nonlin.estBARBIC4,2,function(x) sd(x)/sqrt(B))
-
-u.predZ1AIC <- m.predZ1AIC + qt(0.975,df=B-1)*se.predZ1AIC
-l.predZ1AIC <- m.predZ1AIC - qt(0.975,df=B-1)*se.predZ1AIC
-u.predZ1BIC <- m.predZ1BIC + qt(0.975,df=B-1)*se.predZ1BIC
-l.predZ1BIC <- m.predZ1BIC - qt(0.975,df=B-1)*se.predZ1BIC
-u.predZ2AIC <- m.predZ2AIC + qt(0.975,df=B-1)*se.predZ2AIC
-l.predZ2AIC <- m.predZ2AIC - qt(0.975,df=B-1)*se.predZ2AIC
-u.predZ2BIC <- m.predZ2BIC + qt(0.975,df=B-1)*se.predZ2BIC
-l.predZ2BIC <- m.predZ2BIC - qt(0.975,df=B-1)*se.predZ2BIC
-u.predZ3AIC <- m.predZ3AIC + qt(0.975,df=B-1)*se.predZ3AIC
-l.predZ3AIC <- m.predZ3AIC - qt(0.975,df=B-1)*se.predZ3AIC
-u.predZ3BIC <- m.predZ3BIC + qt(0.975,df=B-1)*se.predZ3BIC
-l.predZ3BIC <- m.predZ3BIC - qt(0.975,df=B-1)*se.predZ3BIC
-u.predZ4AIC <- m.predZ4AIC + qt(0.975,df=B-1)*se.predZ4AIC
-l.predZ4AIC <- m.predZ4AIC - qt(0.975,df=B-1)*se.predZ4AIC
-u.predZ4BIC <- m.predZ4BIC + qt(0.975,df=B-1)*se.predZ4BIC
-l.predZ4BIC <- m.predZ4BIC - qt(0.975,df=B-1)*se.predZ4BIC
-
 ##Save the R plot 
-pdf("LPLMp300n600rho025.pdf")
+pdf("Scenario1.pdf")
 par(mfrow=c(2,2))
-plot(Z1.c,psiZ1true,type="l",xlab =TeX(r'($Z_1$)'),ylab=TeX(r'($\psi_1(Z_1)$)'), ylim = c(-0.1,0.6), lwd=1.5)
-lines(x=Z1.c,y=m.predZ1AIC, col = "orange", lwd=1.5)
-lines(x=Z1.c,y=u.predZ1AIC, col = "orange", lty=2, lwd = 1)
-lines(x=Z1.c,y=l.predZ1AIC, col = "orange", lty=2, lwd = 1)
-lines(x=Z1.c,y=m.predZ1BIC, col = "blue", lwd=1.5)
-lines(x=Z1.c,y=u.predZ1BIC, col = "blue", lty=2, lwd = 1)
-lines(x=Z1.c,y=l.predZ1BIC, col = "blue", lty=2, lwd = 1)
+plot(Z1.c,psiZ1true,type="l",xlab =TeX(r'($Z_1$)'),ylab=TeX(r'($\psi_1(Z_1)$)'), lwd =2.35)
+lines(x=Z1.c,y=m.predZ1AIC, col="#FFCC00", lwd = 1.5)
+lines(x=Z1.c,y=m.predZ1BIC, col="#0000FF", lwd = 1.5)
 
-plot(Z2.c,psiz2true,type="l",xlab=TeX(r'($Z_2$)'),ylab=TeX(r'($\psi_2(Z_2)$)'), ylim = c(-0.05,0.45), lwd=1.5)
-lines(x=Z2.c,y=m.predZ2AIC, col = "orange", lwd=1.5)
-lines(x=Z2.c,y=u.predZ2AIC, col = "orange", lty=2, lwd = 1)
-lines(x=Z2.c,y=l.predZ2AIC, col = "orange", lty=2, lwd = 1)
-lines(x=Z2.c,y=m.predZ2BIC, col = "blue", lwd=1.5)
-lines(x=Z2.c,y=u.predZ2BIC, col = "blue", lty=2, lwd = 1)
-lines(x=Z2.c,y=l.predZ2BIC, col = "blue", lty=2, lwd = 1)
+plot(Z2.c, psiz2true, type = "l", xlab = TeX(r'($Z_2$)'), ylab=TeX(r'($\psi_2(Z_2)$)'), lwd =2.35)
+lines(x=Z2.c,y=m.predZ2AIC, col="#FFCC00", lwd = 1.5)
+lines(x=Z2.c,y=m.predZ2BIC, col="#0000FF", lwd = 1.5)
 
-plot(Z3.c,psiz3true,type="l",xlab=TeX(r'($Z_3$)'),ylab=TeX(r'($\psi_3(Z_3)$)'), ylim =c(-0.25,0.25))
-lines(x=Z3.c,y=m.predZ3AIC, col = "orange", lwd=1.5)
-lines(x=Z3.c,y=u.predZ3AIC, col = "orange", lty=2, lwd = 1)
-lines(x=Z3.c,y=l.predZ3AIC, col = "orange", lty=2, lwd = 1)
-lines(x=Z3.c,y=m.predZ3BIC, col = "blue", lwd=1.5)
-lines(x=Z3.c,y=u.predZ3BIC, col = "blue", lty=2, lwd = 1)
-lines(x=Z3.c,y=l.predZ3BIC, col = "blue", lty=2, lwd = 1)
+plot(Z3.c,psiz3true,type="l",xlab=TeX(r'($Z_3$)'),ylab=TeX(r'($\psi_3(Z_3)$)'), lwd=2.35)
+lines(x=Z3.c,y=m.predZ3AIC, col="#FFCC00", lwd = 1.5)
+lines(x=Z3.c,y=m.predZ3BIC, col="#0000FF", lwd = 1.5)
 
-plot(Z4.c,psiz4true,type="l",xlab=TeX(r'($Z_4$)'),ylab=TeX(r'($\psi_4(Z_4)$)'), ylim =c(-1.55,1.55), lwd=1.5 )
-lines(x=Z4.c,y=m.predZ4AIC, col = "orange", lwd=1.5)
-lines(x=Z4.c,y=u.predZ4AIC, col = "orange", lty=2, lwd = 1)
-lines(x=Z4.c,y=l.predZ4AIC, col = "orange", lty=2, lwd = 1)
-lines(x=Z4.c,y=m.predZ4BIC, col = "blue", lwd=1.5)
-lines(x=Z4.c,y=u.predZ4BIC, col = "blue", lty=2, lwd = 1)
-lines(x=Z4.c,y=l.predZ4BIC, col = "blue", lty=2, lwd = 1)
+plot(Z4.c,psiz4true,type="l",xlab=TeX(r'($Z_4$)'),ylab=TeX(r'($\psi_4(Z_4)$)'), lwd=2.7 )
+lines(x=Z4.c,y=m.predZ4AIC, col="#FFCC00", lwd = 1.5)
+lines(x=Z4.c,y=m.predZ4BIC, col="#0000FF", lwd = 1.5)
 
 dev.off()
 
