@@ -1,12 +1,4 @@
-#THREE non-linear function
-#The other non linear function \psi(Z) = 2(Z-3)^2
-#The other non linear function is \psi(Z) = cos(2piZ)+1
-#The third non linear function is \psi(Z) = sin(2piZ)
-#Fourth non-linear function is \psi(Z) = (x+1)^3
-#This script DOES NOT perform variable selection on the alphas
-#Compute Median Mean Squared Error (MMSE) of the non-zero betas
-#WITH INTERCEPT
-#p=300,n=600
+#Code for Scenario 2
 
 rm(list=ls())
 
@@ -48,11 +40,6 @@ reg.estLasso <- matrix(0,B,p+qW) #stores the regression estimates of Lasso penal
 reg.estALasso <- matrix(0,B,p+qW) #stores the regression estimates of Alasso penalty
 reg.estBARBIC <- matrix(0,B,p+qW) #stores the regression estimates of SCAD
 reg.estMLE <- matrix(0,B,pz+qW) #stores regression estimates of MLE
-
-gammaAIC1.Z <- matrix(0,B,b+as.integer(int)) #stores the est gamma values of psi(Z1)
-gammaAIC2.Z <- matrix(0,B,b+as.integer(int)) #stores the est gamma values of psi(Z2)
-gammaAIC3.Z <- matrix(0,B,b+as.integer(int)) #stores the est gamma values of psi(Z3)
-gammaAIC4.Z <- matrix(0,B,b+as.integer(int)) #stores the est gamma values of psi(Z4)
 
 Z1.c <- seq(l1+adj1,r1-adj1,by=0.001) #control sequence of Z1
 Z2.c <- seq(l2+adj2,r2-adj2,by=0.001) #control sequence of Z2
@@ -161,10 +148,6 @@ while(a <= B){
   nonlin.estBARBIC2[a,] <- p2%*%gammaBIC2_hat
   nonlin.estBARBIC3[a,] <- p3%*%gammaBIC3_hat
   nonlin.estBARBIC4[a,] <- p4%*%gammaBIC4_hat
-  gammaAIC1.Z[a,] <- gammaAIC1_hat
-  gammaAIC2.Z[a,] <- gammaAIC2_hat
-  gammaAIC3.Z[a,] <- gammaAIC3_hat
-  gammaAIC4.Z[a,] <- gammaAIC4_hat
   
   MSE.BARAIC[a] <- t(reg.estBARAIC[a,1:p]-beta)%*%Sigma_X%*%(reg.estBARAIC[a,1:p]-beta)
   MSE.Lasso[a] <- t(reg.estLasso[a,1:p]-beta)%*%Sigma_X%*%(reg.estLasso[a,1:p]-beta)
@@ -214,33 +197,15 @@ for(i in 1:B){
   TM4[i] <- ifelse(TP4[i] + TN4[i] == p, 1, 0)
 }
 
-m_TP1 <- mean(TP1)
-m_TN1 <- mean(TN1)
-m_FP1 <- mean(FP1)
-m_TM1 <- mean(TM1)
-m_TP2 <- mean(TP2)
-m_TN2 <- mean(TN2)
-m_FP2 <- mean(FP2)
-m_TM2 <- mean(TM2)
-m_TP3 <- mean(TP3)
-m_TN3 <- mean(TN3)
-m_FP3 <- mean(FP3)
-m_TM3 <- mean(TM3)
-m_TP4 <- mean(TP4)
-m_TN4 <- mean(TN4)
-m_FP4 <- mean(FP4)
-m_TM4 <- mean(TM4)
+m_TP1 <- mean(TP1); m_TN1 <- mean(TN1); m_FP1 <- mean(FP1); m_TM1 <- mean(TM1)
+m_TP2 <- mean(TP2); m_TN2 <- mean(TN2); m_FP2 <- mean(FP2); m_TM2 <- mean(TM2)
+m_TP3 <- mean(TP3); m_TN3 <- mean(TN3); m_FP3 <- mean(FP3); m_TM3 <- mean(TM3)
+m_TP4 <- mean(TP4); m_TN4 <- mean(TN4); m_FP4 <- mean(FP4); m_TM4 <- mean(TM4)
 
-MMSE.BARAIC <- median(MSE.BARAIC)
-MMSE.Lasso <- median(MSE.Lasso)
-MMSE.ALasso <- median(MSE.ALasso)
-MMSE.BARBIC <- median(MSE.BARBIC)
-MMSE.GLMMLE <- median(MSE.GLMMLE)
-SD.BARAIC <- sd(MSE.BARAIC)
-SD.Lasso <- sd(MSE.Lasso)
-SD.ALasso <- sd(MSE.ALasso)
-SD.BARBIC <- sd(MSE.BARBIC)
-SD.GLMMLE <- sd(MSE.GLMMLE)
+MMSE.BARAIC <- median(MSE.BARAIC); MMSE.Lasso <- median(MSE.Lasso); MMSE.ALasso <- median(MSE.ALasso)
+MMSE.BARBIC <- median(MSE.BARBIC); MMSE.GLMMLE <- median(MSE.GLMMLE)
+SD.BARAIC <- sd(MSE.BARAIC); SD.Lasso <- sd(MSE.Lasso); SD.ALasso <- sd(MSE.ALasso)
+SD.BARBIC <- sd(MSE.BARBIC); SD.GLMMLE <- sd(MSE.GLMMLE)
 
 #Estimate
 estBARAIC <- apply(reg.estBARAIC[,nzpos],2,mean) 
@@ -341,28 +306,25 @@ m.predZ1BIC <- apply(nonlin.estBARBIC1,2,mean)
 m.predZ2BIC <- apply(nonlin.estBARBIC2,2,mean)
 m.predZ3BIC <- apply(nonlin.estBARBIC3,2,mean)
 m.predZ4BIC <- apply(nonlin.estBARBIC4,2,mean) 
+                 
 ##Save the R plot 
-pdf("LPLMweakp300n600rho025.pdf")
+pdf("Scenario2.pdf")
 par(mfrow=c(2,2))
-plot(Z1.c,psiZ1true,type="l",xlab =TeX(r'($Z_1$)'),ylab=TeX(r'($\psi_1(Z_1)$)') )
-lines(x=Z1.c,y=m.predZ1AIC, lty=2)
-lines(x=Z1.c,y=m.predZ1BIC, lty=3)
-#legend(1, 1, legend=c("Real", "Est"),col=c("black", "red"), lty=1:2, cex=0.6)
+plot(Z1.c,psiZ1true,type="l",xlab =TeX(r'($Z_1$)'),ylab=TeX(r'($\psi_1(Z_1)$)'), lwd =2.35)
+lines(x=Z1.c,y=m.predZ1AIC, col="#FFCC00", lwd = 1.5)
+lines(x=Z1.c,y=m.predZ1BIC, col="#0000FF", lwd = 1.5)
 
-plot(Z2.c,psiz2true,type="l",xlab=TeX(r'($Z_2$)'),ylab=TeX(r'($\psi_2(Z_2)$)') )
-lines(x=Z2.c,y=m.predZ2AIC, lty=2)
-lines(x=Z2.c,y=m.predZ2BIC, lty=3)
-#legend(0.8, 0.4, legend=c("Real", "Est"),col=c("black", "red"), lty=1:2, cex=0.6)
+plot(Z2.c, psiz2true, type = "l", xlab = TeX(r'($Z_2$)'), ylab=TeX(r'($\psi_2(Z_2)$)'), lwd =2.35)
+lines(x=Z2.c,y=m.predZ2AIC, col="#FFCC00", lwd = 1.5)
+lines(x=Z2.c,y=m.predZ2BIC, col="#0000FF", lwd = 1.5)
 
-plot(Z3.c,psiz3true,type="l",xlab=TeX(r'($Z_3$)'),ylab=TeX(r'($\psi_3(Z_3)$)') )
-lines(x=Z3.c,y=m.predZ3AIC, lty=2)
-lines(x=Z3.c,y=m.predZ3BIC, lty=3)
-#legend(0, -0.4, legend=c("Real", "Est"),col=c("black", "red"), lty=1:2, cex=0.6)
+plot(Z3.c,psiz3true,type="l",xlab=TeX(r'($Z_3$)'),ylab=TeX(r'($\psi_3(Z_3)$)'), lwd=2.35)
+lines(x=Z3.c,y=m.predZ3AIC, col="#FFCC00", lwd = 1.5)
+lines(x=Z3.c,y=m.predZ3BIC, col="#0000FF", lwd = 1.5)
 
-plot(Z4.c,psiz4true,type="l",xlab=TeX(r'($Z_4$)'),ylab=TeX(r'($\psi_4(Z_4)$)') )
-lines(x=Z4.c,y=m.predZ4AIC, lty=2)
-lines(x=Z4.c,y=m.predZ4BIC, lty=3)
-#legend(-3, 4, legend=c("Real", "Est"),col=c("black", "red"), lty=1:2, cex=0.6)
+plot(Z4.c,psiz4true,type="l",xlab=TeX(r'($Z_4$)'),ylab=TeX(r'($\psi_4(Z_4)$)'), lwd=2.7 )
+lines(x=Z4.c,y=m.predZ4AIC, col="#FFCC00", lwd = 1.5)
+lines(x=Z4.c,y=m.predZ4BIC, col="#0000FF", lwd = 1.5)
 
 dev.off()
 
