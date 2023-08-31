@@ -8,4 +8,4 @@ install.packages("Cyclops")
 install.packages("BrokenAdaptiveRidge")
 ```
 
-We provide the sample code for the three scenarios (Scenario 1, Scenario 2 and Scenario 4) in our manuscript. For scenario 1, please refer to \textit{LPLMNEWn600p300.R}
+We provide the sample code for the three scenarios (Scenario 1, Scenario 2 and Scenario 4) in our manuscript. For scenario 1, where the strong signals in beta are considered, please refer to LPLMNEWn600p300.R. For scenario 2, where a mixture of strong and weak signals in beta are considered, please refer to LPLMWEAKn600p300.R.
