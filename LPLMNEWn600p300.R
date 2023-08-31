@@ -1,8 +1,6 @@
 #This script DOES NOT perform variable selection on the alphas
-#Compute Median Mean Squared Error (MMSE) of the non-zero betas
-#WITH INTERCEPT
 #p=300,n=600
-#Our model doesn't have an intercept
+#Our model doesn't include an intercept for the simulation of the response variable
 
 rm(list=ls())
 
@@ -22,9 +20,9 @@ pz = 5 # number of non-zero high-dimensional parameters
 pnonz = p - pz 
 qW = 5 # number of categorical variables
 qZ = 4 # number of non-linear variables
-B = 20 #number of replications
+B = 20 # number of replications
 prob = 0.5 
-beta <- c(1,-1,rep(0, pnonz),-1,0.75,0.75) #vector of high-dimensional "genetic" covariates
+beta <- c(1,-1,rep(0,pnonz),-1,0.75,0.75) #vector of high-dimensional "genetic" covariates
 alpha <- c(1,-0.5,-0.5,0.75,-1) #alphas are not zero
 nzpos <- c(1,2,(p-2):p) #index position of non-zero regression parameters, ONLY for high dimensional covariates
 zpos <- (1:p)[-nzpos] #index position of zero regression parameters, ONLY for high dimensional covariates
@@ -59,6 +57,7 @@ nonlin.estBARBIC2 <- matrix(0,B,length(Z2.c))
 nonlin.estBARBIC3 <- matrix(0,B,length(Z3.c)) 
 nonlin.estBARBIC4 <- matrix(0,B,length(Z4.c)) 
 
+#stores the mean squared error
 MSE.BARAIC <- numeric(B) #MMSE:median mean squared error
 MSE.Lasso <- numeric(B) 
 MSE.ALasso <- numeric(B)
@@ -70,8 +69,8 @@ a=1
 
 while(a <= B){
   
-  mu_X <- rep(0,p)
-  Sigma_X <- matrix(0, nrow = p, ncol = p)
+  mu_X <- rep(0,p) #mean vector
+  Sigma_X <- matrix(0, nrow = p, ncol = p) #variance-covariance matrix
   
   for(ii in 1:p){
     for(jj in 1:p){
@@ -94,7 +93,6 @@ while(a <= B){
   Z4_t <- sapply(1:n, FUN=function(i) 0.2*(Z4[i]+1)^3 )
   
   Y <- rbinom(n, 1, 1/(1+exp(-X%*%beta - W%*%alpha - Z1_t - Z2_t - Z3_t - Z4_t)))
-  cat("Ratio of 0 to 1 is", table(Y)/n, "\n")
   
   #Data estimation using Bernstein polynomials
   Z1_b <- bernsteinPoly(Z1, degree=b, intercept=int)
@@ -135,6 +133,7 @@ while(a <= B){
   p3 <- predict(object=Z3_b,newx=Z3.c)-matrix(rep(predict(Z3_b,newx=0.5), length(Z3.c)), nrow=length(Z3.c), byrow=TRUE)
   p4 <- predict(object=Z4_b,newx=Z4.c)-matrix(rep(predict(Z4_b,newx=-1),length(Z4.c)), nrow=length(Z4.c), byrow=TRUE)
 
+  #######
   #Manually change the chunk of code below if you want to have a different number of non-linear functions.               
   gammaAIC1_hat <- coef(FitBARAIC)[(p+qW+2):(p+qW+b+as.integer(int)+1)]
   gammaAIC2_hat <- coef(FitBARAIC)[(p+qW+b+as.integer(int)+2):(p+qW+2*b+2*as.integer(int)+1)]
@@ -153,7 +152,9 @@ while(a <= B){
   nonlin.estBARBIC2[a,] <- p2%*%gammaBIC2_hat
   nonlin.estBARBIC3[a,] <- p3%*%gammaBIC3_hat
   nonlin.estBARBIC4[a,] <- p4%*%gammaBIC4_hat
-  
+
+  ########   
+                 
   MSE.BARAIC[a] <- t(reg.estBARAIC[a,1:p]-beta)%*%Sigma_X%*%(reg.estBARAIC[a,1:p]-beta)
   MSE.Lasso[a] <- t(reg.estLasso[a,1:p]-beta)%*%Sigma_X%*%(reg.estLasso[a,1:p]-beta)
   MSE.ALasso[a] <- t(reg.estALasso[a,1:p]-beta)%*%Sigma_X%*%(reg.estALasso[a,1:p]-beta)
@@ -228,7 +229,7 @@ sdBARAIC <- apply(reg.estBARAIC[,nzpos],2,sd)
 sdBARBIC <- apply(reg.estBARBIC[,nzpos],2,sd)
 sdLasso <- apply(reg.estLasso[,nzpos],2,sd)
 sdALasso <- apply(reg.estALasso[,nzpos],2,sd)
-sdOracle <- apply(reg.estMLE[,1:5],2,sd)
+sdOracle <- apply(reg.estMLE[,1:pz],2,sd)
 
 ##
 estqWBARAIC = colMeans(reg.estBARAIC[,(p+1):(p+qW)])
@@ -249,7 +250,7 @@ sdqwLasso = apply(reg.estLasso[,(p+1):(p+qW)],2,sd)
 sdqwALasso = apply(reg.estALasso[,(p+1):(p+qW)],2,sd)
 sdqWOracle = apply(reg.estMLE[,(pz+1):(pz+qW)],2,sd)
 
-fileConn = "VariableSelectionResultsLPLMn600p300.txt"
+fileConn = "VariableSelectionResultsScenario1.txt"
 write(x=paste("sample size is", n, sep=""),fileConn,append = FALSE)
 write(x=paste("p is", p, sep=""),fileConn,append=TRUE)
 write(x=paste("rho is", rho, sep=""),fileConn,append=TRUE)
@@ -276,7 +277,7 @@ write(x=paste("SD of ALasso is :", round(SD.ALasso,3), sep = ""),fileConn, appen
 write(x=paste("SD of SCAD is :", round(SD.BARBIC,3), sep = ""),fileConn, append = TRUE)
 write(x=paste("SD of Oracle is :", round(SD.GLMMLE,3), sep = ""),fileConn, append = TRUE)
 
-fileConn2 = "EstimationResultsLPLMn600p300.txt"
+fileConn2 = "EstimationResultsScenario1.txt"
 write(x=paste("Bias of Betas for BAR-AIC:", round(b_BARAIC,2), sep=""), fileConn2, append=FALSE)
 write(x=paste("Bias of Betas for BAR-BIC:", round(b_BARBIC,2), sep=""), fileConn2, append=T)
 write(x=paste("Bias of Betas for Lasso:", round(b_Lasso,2), sep=""), fileConn2, append=T)
