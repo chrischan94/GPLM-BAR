@@ -21,7 +21,7 @@ qW = 5 # number of categorical variables
 qZ = 4 # number of non-linear variables
 B = 200 #number of replications
 prob = 0.5 
-beta <- c(2,-2,rep(0, pnonz),-2,1.5,1.5)/4 #vector of high-dimensional "genetic" covariates
+beta <- c(1,-0.5,rep(0,pnonz),-1,0.4,0.75) #vector of high-dimensional "genetic" covariates
 alpha <- c(1,-0.5,-0.5,0.75,-1) #alphas are not zero
 nzpos <- c(1,2,(p-2):p) #index position of non-zero regression parameters, ONLY for high dimensional covariates
 zpos <- (1:p)[-nzpos] #index position of zero regression parameters, ONLY for high dimensional covariates
@@ -55,6 +55,7 @@ nonlin.estBARBIC2 <- matrix(0,B,length(Z2.c))
 nonlin.estBARBIC3 <- matrix(0,B,length(Z3.c)) 
 nonlin.estBARBIC4 <- matrix(0,B,length(Z4.c)) 
 
+#stores the mean squared error (MSE) 
 MSE.BARAIC <- numeric(B) #MMSE:median mean squared error
 MSE.Lasso <- numeric(B) 
 MSE.ALasso <- numeric(B)
@@ -66,8 +67,8 @@ a=1
 
 while(a <= B){
   
-  mu_X <- rep(0,p)
-  Sigma_X <- matrix(0, nrow = p, ncol = p)
+  mu_X <- rep(0,p) #mean vector
+  Sigma_X <- matrix(0, nrow = p, ncol = p) #variance-covariance matrix
   
   for(ii in 1:p){
     for(jj in 1:p){
@@ -90,7 +91,6 @@ while(a <= B){
   Z4_t <- sapply(1:n, FUN=function(i) 0.2*(Z4[i]+1)^3)
   
   Y <- rbinom(n, 1, 1/(1+exp(-X%*%beta - W%*%alpha - Z1_t - Z2_t - Z3_t - Z4_t)))
-  cat("Ratio of 0 to 1 is", table(Y)/n, "\n")
   
   #Data estimation using Bernstein polynomials
   Z1_b <- bernsteinPoly(Z1, degree=b, intercept=int)
