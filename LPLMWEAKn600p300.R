@@ -11,7 +11,7 @@ library(glmnet) #for Lasso and Adaptive Lasso
 library(latex2exp)
 
 #Global Variables
-random.seed = 2025
+random.seed = 12
 rho = 0.25  
 p = 300 # number of high-dimensional covariates
 n = 600 # sample size
