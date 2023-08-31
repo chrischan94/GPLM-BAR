@@ -8,4 +8,4 @@ install.packages("Cyclops")
 install.packages("BrokenAdaptiveRidge")
 ```
 
-We provide the sample code for the three scenarios (Scenario 1, Scenario 2 and Scenario 4) in our manuscript. For scenario 1, please refer to \verb|LPLMNEWn600p300.R|
+We provide the sample code for the three scenarios (Scenario 1, Scenario 2 and Scenario 4) in our manuscript. For scenario 1, please refer to \textit{LPLMNEWn600p300.R}
