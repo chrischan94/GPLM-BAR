@@ -279,7 +279,7 @@ sdqwLasso = apply(reg.estLasso[,(p+1):(p+qW)],2,sd)
 sdqwALasso = apply(reg.estALasso[,(p+1):(p+qW)],2,sd)
 sdqWOracle = apply(reg.estMLE[,(pz+1):(pz+qW)],2,sd)
 
-fileConn = "VariableSelectionResultsPLPn600p300.txt"
+fileConn = "VariableSelectionResultsScenario4.txt"
 write(x=paste("sample size is", n, sep=""),fileConn,append = FALSE)
 write(x=paste("p is", p,sep=""),fileConn,append=TRUE)
 write(x=paste("rho is", rho,sep=""),fileConn,append=TRUE)
@@ -306,7 +306,7 @@ write(x=paste("SD of ALasso is :", round(SD.ALasso,3), sep = ""),fileConn, appen
 write(x=paste("SD of SCAD is :", round(SD.BARBIC,3), sep = ""),fileConn, append = TRUE)
 write(x=paste("SD of Oracle is:", round(SD.GLMMLE,3), sep = ""),fileConn, append = TRUE)
 
-fileConn2 = "EstimationResultsPLPn600p300.txt"
+fileConn2 = "EstimationResultsScenario4.txt"
 write(x=paste("Bias of Betas for BAR-AIC:", round(b_BARAIC,3), sep=""), fileConn2, append=FALSE)
 write(x=paste("Bias of Betas for BAR-BIC:", round(b_BARBIC,3), sep=""), fileConn2, append=T)
 write(x=paste("Bias of Betas for Lasso:", round(b_Lasso,3), sep=""), fileConn2, append=T)
@@ -341,7 +341,7 @@ m.predZ2BIC <- apply(nonlin.estBARBIC2,2,mean)
 m.predZ3BIC <- apply(nonlin.estBARBIC3,2,mean)
 m.predZ4BIC <- apply(nonlin.estBARBIC4,2,mean) 
 
-pdf("PLPn600p300.pdf")
+pdf("Scenario4.pdf")
 par(mfrow=c(2,2))
 plot(Z1.c,psiZ1true,type="l",xlab =TeX(r'($Z_1$)'),ylab=TeX(r'($\psi_1(Z_1)$)') )
 lines(x=Z1.c,y=m.predZ1AIC, lty=2)
