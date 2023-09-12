@@ -337,5 +337,3 @@ lines(x=Z4.c,y=m.predZ4AIC, col="#FFCC00", lwd = 1.5)
 lines(x=Z4.c,y=m.predZ4BIC, col="#0000FF", lwd = 1.5)
 
 dev.off()
-
-cat("The program ends at", date(), "\n")
