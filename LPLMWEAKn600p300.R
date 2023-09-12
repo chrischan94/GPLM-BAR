@@ -11,7 +11,7 @@ library(glmnet) #for Lasso and Adaptive Lasso
 library(latex2exp)
 
 #Global Variables
-random.seed = 12
+random.seed = 1234
 rho = 0.25  
 p = 300 # number of high-dimensional covariates
 n = 600 # sample size
@@ -22,10 +22,10 @@ qZ = 4 # number of non-linear variables
 B = 200 #number of replications
 prob = 0.5 
 beta <- c(1,-0.5,rep(0,pnonz),-1,0.4,0.75) #vector of high-dimensional "genetic" covariates
-alpha <- c(1,-0.5,-0.5,0.75,-1) #alphas are not zero
+alpha <- c(1,-0.5,-0.5,0.75,-1) #vector of alphas
 nzpos <- c(1,2,(p-2):p) #index position of non-zero regression parameters, ONLY for high dimensional covariates
 zpos <- (1:p)[-nzpos] #index position of zero regression parameters, ONLY for high dimensional covariates
-b = 3 #number of basis functions, 3 basis functions is fine
+b = 3 #number of basis functions
 l1 = 0.85 #left
 r1 = 5.15 #right
 l2 = -0.05
