@@ -23,10 +23,13 @@ qZ = 4 # number of non-linear variables
 B = 20 # number of replications
 prob = 0.5 
 beta <- c(1,-1,rep(0,pnonz),-1,0.75,0.75) #vector of high-dimensional "genetic" covariates
-alpha <- c(1,-0.5,-0.5,0.75,-1) #alphas are not zero
-nzpos <- c(1,2,(p-2):p) #index position of non-zero regression parameters, ONLY for high dimensional covariates
-zpos <- (1:p)[-nzpos] #index position of zero regression parameters, ONLY for high dimensional covariates
-b = 3 #number of basis functions
+alpha <- c(1,-0.5,-0.5,0.75,-1) #vector of alpha
+nzpos <- c(1,2,(p-2):p) #index position of non-zero signals in beta
+zpos <- (1:p)[-nzpos] #index position of zero signals in beta
+b = 3 #number of basis functions (m_j)
+
+######
+#l1,l2,l3,r1,r2,r3,adj1,adj2 are control sequences for the plotting of our non-linear functions
 l1 = 0.85 #left
 r1 = 5.15 #right
 l2 = -0.05
@@ -35,11 +38,13 @@ l3 = -3.15
 r3 = 1.15
 adj1 = 0.2
 adj2 = 0.05
-int = TRUE #Bernstein Polynomials with intercept (TRUE) or no intercept (FALSE)
-reg.estBARAIC <- matrix(0,B,p+qW) #stores the regression estimates of BAR
-reg.estLasso <- matrix(0,B,p+qW) #stores the regression estimates of Lasso penalty
-reg.estALasso <- matrix(0,B,p+qW) #stores the regression estimates of Alasso penalty
-reg.estBARBIC <- matrix(0,B,p+qW) #stores the regression estimates of SCAD
+#######
+
+int = TRUE #returns Bernstein Polynomials with intercept 
+reg.estBARAIC <- matrix(0,B,p+qW) #stores the regression estimates (beta + alpha) of BAR
+reg.estLasso <- matrix(0,B,p+qW) #stores the regression estimates (beta + alpha) of Lasso penalty
+reg.estALasso <- matrix(0,B,p+qW) #stores the regression estimates (beta + alpha) of Alasso penalty
+reg.estBARBIC <- matrix(0,B,p+qW) #stores the regression estimates (beta + alpha) of SCAD
 reg.estMLE <- matrix(0,B,pz+qW) #stores regression estimates of MLE(Oracle)
 
 #control sequences of Z1-Z4
@@ -48,17 +53,17 @@ Z2.c <- seq(l2+adj2,r2-adj2,by=0.001)
 Z3.c <- seq(l2+adj2,r2-adj2,by=0.001)
 Z4.c <- seq(l3+adj1,r3-adj1,by=0.001)
 
-nonlin.estBARAIC1 <- matrix(0,B,length(Z1.c)) #stores the estimated alphas of PLLRM-BAR of $\psi_1(Z_1)$
+nonlin.estBARAIC1 <- matrix(0,B,length(Z1.c)) #stores the gammas of Bernstein polynomials of $\psi_1(Z_1)$ using AIC penalty
 nonlin.estBARAIC2 <- matrix(0,B,length(Z2.c)) 
 nonlin.estBARAIC3 <- matrix(0,B,length(Z3.c)) 
 nonlin.estBARAIC4 <- matrix(0,B,length(Z4.c)) 
-nonlin.estBARBIC1 <- matrix(0,B,length(Z1.c)) #stores the estimated alphas of PLLRM-BAR of $\psi_1(Z_1)$
+nonlin.estBARBIC1 <- matrix(0,B,length(Z1.c)) #stores the gammas of Bernstein polynomials of $\psi_1(Z_1)$ using BIC penalty
 nonlin.estBARBIC2 <- matrix(0,B,length(Z2.c)) 
 nonlin.estBARBIC3 <- matrix(0,B,length(Z3.c)) 
 nonlin.estBARBIC4 <- matrix(0,B,length(Z4.c)) 
 
-#stores the mean squared error
-MSE.BARAIC <- numeric(B) #MMSE:median mean squared error
+#stores the median mean squared error (MMSE)
+MSE.BARAIC <- numeric(B) 
 MSE.Lasso <- numeric(B) 
 MSE.ALasso <- numeric(B)
 MSE.BARBIC <- numeric(B)
