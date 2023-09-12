@@ -12,7 +12,7 @@ library(glmnet) #for Lasso and Adaptive Lasso
 library(latex2exp)
 
 #Global Variables
-random.seed = 12
+random.seed = 123
 rho = 0.25  
 p = 300 # number of high-dimensional covariates
 n = 600 # sample size
@@ -117,14 +117,13 @@ while(a <= B){
   FitBARAIC <- fitCyclopsModel(cData, prior=PrAIC) 
   FitBARBIC <- fitCyclopsModel(cData, prior=PrBIC)
   
-  #Initial values of the coefficients is done such that convergence is achieved
   cvRidge <- cv.glmnet(x=Xmat, y=Y, family="binomial", type.measure="deviance", alpha=0)
   cvLasso <- cv.glmnet(x=Xmat, y=Y, family="binomial", type.measure="deviance", alpha=1)
   FitLasso <- glmnet(x=Xmat, y=Y, family="binomial", alpha=1, lambda=cvLasso$lambda.1se, penalty.factor=c(rep(1,p),rep(0,qW+qZ*(b+as.integer(int)))))
   coefRidge <- coef(cvRidge, s=cvRidge$lambda.min)[-1]
   cvAlasso <- cv.glmnet(x=Xmat, y=Y, family="binomial", type.measure="deviance", alpha = 1, penalty.factor = 1/abs(coefRidge))
   Alassofit <- glmnet(x=Xmat, y = Y, family = "binomial", alpha = 1, lambda = cvAlasso$lambda.1se,penalty.factor = c(1/abs(coefRidge[1:p]), rep(0,qW+qZ*(b+as.integer(int)))))
-  Xmat_red <- Xmat[,-zpos]
+  Xmat_red <- Xmat[,-zpos] #reduces the data matrix to the "known" betas with signals
   GLMest <- coef(glm(Y ~ Xmat_red, family = "binomial"))[(2:(pz+qW+1))]
   
   reg.estBARAIC[a,] <- coef(FitBARAIC)[-c(1,(p+qW+2):(p+qW+qZ*b+qZ*as.integer(int)+1))] 
@@ -148,7 +147,8 @@ while(a <= B){
   gammaBIC2_hat <- coef(FitBARBIC)[(p+qW+b+as.integer(int)+2):(p+qW+2*b+2*as.integer(int)+1)]
   gammaBIC3_hat <- coef(FitBARBIC)[(p+qW+2*b+2*as.integer(int)+2):(p+qW+3*b+3*as.integer(int)+1)]
   gammaBIC4_hat <- coef(FitBARBIC)[(p+qW+3*b+3*as.integer(int)+2):(p+qW+qZ*b+qZ*as.integer(int)+1)]
-                 
+  #######
+  
   nonlin.estBARAIC1[a,] <- p1%*%gammaAIC1_hat
   nonlin.estBARAIC2[a,] <- p2%*%gammaAIC2_hat
   nonlin.estBARAIC3[a,] <- p3%*%gammaAIC3_hat
@@ -170,7 +170,7 @@ while(a <= B){
   cat("Iteration", a-1, "is done.", "\n")
 }
 
-#Summarize Results
+### Summarize Results 
 true<- c(beta)
 TP1 <- numeric(B) #True positives: the number of non-zero regression parameters estimated as non-zero
 TN1 <- numeric(B) #True negatives: the number of zero regression parameters estimated as zero
