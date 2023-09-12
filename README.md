@@ -10,7 +10,7 @@ install.packages("BrokenAdaptiveRidge")
 
 We provide the sample code for the three scenarios (Scenario 1, Scenario 2 and Scenario 4) from our manuscript. 
 
-For scenario 1, under the logistic partly linear model framework, where relative strong signals in the betas are considered, please refer to *LPLMNEWn600p300.R*.
+For scenario 1, under the logistic partly linear model framework, where relative strong signals in the betas are considered, please refer to <em>LPLMNEWn600p300.R</em>.
 
 For scenario 2, under the logistic partly linear model framework, where a mixture of strong and weak signals in beta are considered, please refer to *LPLMWEAKn600p300.R*.
 
