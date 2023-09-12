@@ -112,10 +112,10 @@ while(a <= B){
   
   #Initial values of the coefficients is done such that convergence is achieved
   cvRidge <- cv.glmnet(x=Xmat, y=Y, family="binomial", type.measure="deviance", alpha=0)
-  cvLasso <- cv.glmnet(x=Xmat, y=Y, family="binomial", type.measure="deviance", alpha=1)
+  cvLasso <- cv.glmnet(x=Xmat, y=Y, family="binomial", type.measure="deviance", alpha=1, penalty.factor=c(rep(1,p),rep(0,qW+qZ*(b+as.integer(int)))))
   FitLasso <- glmnet(x=Xmat, y=Y, family="binomial", alpha=1, lambda=cvLasso$lambda.1se, penalty.factor=c(rep(1,p),rep(0,qW+qZ*(b+as.integer(int)))))
   coefRidge <- coef(cvRidge, s=cvRidge$lambda.min)[-1]
-  cvAlasso <- cv.glmnet(x=Xmat, y=Y, family="binomial", type.measure="deviance", alpha = 1, penalty.factor = 1/abs(coefRidge))
+  cvAlasso <- cv.glmnet(x=Xmat, y=Y, family="binomial", type.measure="deviance", alpha = 1, penalty.factor = c(1/abs(coefRidge[1:p]), rep(0,qW+qZ*(b+as.integer(int)))))
   Alassofit <- glmnet(x=Xmat, y = Y, family = "binomial", alpha = 1, lambda = cvAlasso$lambda.1se,penalty.factor = c(1/abs(coefRidge[1:p]), rep(0,qW+qZ*(b+as.integer(int)))))
   Xmat_red <- Xmat[,-zpos]
   GLMest <- coef(glm(Y ~ Xmat_red, family = "binomial"))[(2:(pz+qW+1))]
